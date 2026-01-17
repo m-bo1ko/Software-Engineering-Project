@@ -17,8 +17,15 @@ type Config struct {
 	Security  SecurityServiceConfig
 	IoT       IoTServiceConfig
 	Forecast  ForecastServiceConfig
+	Storage   StorageServiceConfig
 	Analytics AnalyticsConfig
 	Logging   LoggingConfig
+}
+
+// StorageServiceConfig holds Storage service integration settings
+type StorageServiceConfig struct {
+	URL     string
+	Timeout time.Duration
 }
 
 // ServerConfig holds server-related configuration
@@ -55,9 +62,9 @@ type ForecastServiceConfig struct {
 
 // AnalyticsConfig holds analytics-specific settings
 type AnalyticsConfig struct {
-	AnomalyDetectionEnabled bool
-	KPICalculationInterval  time.Duration
-	ReportRetentionDays     int
+	AnomalyDetectionEnabled       bool
+	KPICalculationInterval        time.Duration
+	ReportRetentionDays           int
 	TimeSeriesAggregationInterval time.Duration
 }
 
@@ -97,10 +104,14 @@ func Load() *Config {
 			URL:     getEnv("FORECAST_SERVICE_URL", "http://localhost:8082"),
 			Timeout: time.Duration(getEnvAsInt("FORECAST_SERVICE_TIMEOUT", 10)) * time.Second,
 		},
+		Storage: StorageServiceConfig{
+			URL:     getEnv("STORAGE_SERVICE_URL", "http://localhost:8086/storage"),
+			Timeout: time.Duration(getEnvAsInt("STORAGE_SERVICE_TIMEOUT", 10)) * time.Second,
+		},
 		Analytics: AnalyticsConfig{
-			AnomalyDetectionEnabled: getEnvAsBool("ANALYTICS_ANOMALY_DETECTION_ENABLED", true),
-			KPICalculationInterval:  time.Duration(getEnvAsInt("ANALYTICS_KPI_CALCULATION_INTERVAL", 60)) * time.Minute,
-			ReportRetentionDays:     getEnvAsInt("ANALYTICS_REPORT_RETENTION_DAYS", 90),
+			AnomalyDetectionEnabled:       getEnvAsBool("ANALYTICS_ANOMALY_DETECTION_ENABLED", true),
+			KPICalculationInterval:        time.Duration(getEnvAsInt("ANALYTICS_KPI_CALCULATION_INTERVAL", 60)) * time.Minute,
+			ReportRetentionDays:           getEnvAsInt("ANALYTICS_REPORT_RETENTION_DAYS", 90),
 			TimeSeriesAggregationInterval: time.Duration(getEnvAsInt("ANALYTICS_TIME_SERIES_AGGREGATION_INTERVAL", 60)) * time.Minute,
 		},
 		Logging: LoggingConfig{

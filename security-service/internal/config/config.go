@@ -18,7 +18,14 @@ type Config struct {
 	Encryption   EncryptionConfig
 	Notification NotificationConfig
 	Energy       EnergyProviderConfig
+	Storage      StorageServiceConfig
 	Logging      LoggingConfig
+}
+
+// StorageServiceConfig holds Storage service integration settings
+type StorageServiceConfig struct {
+	URL     string
+	Timeout time.Duration
 }
 
 // ServerConfig holds server-related configuration
@@ -104,6 +111,10 @@ func Load() *Config {
 			APIKey:       getEnv("ENERGY_PROVIDER_API_KEY", ""),
 			ClientID:     getEnv("ENERGY_PROVIDER_CLIENT_ID", ""),
 			ClientSecret: getEnv("ENERGY_PROVIDER_CLIENT_SECRET", ""),
+		},
+		Storage: StorageServiceConfig{
+			URL:     getEnv("STORAGE_SERVICE_URL", "http://localhost:8086/storage"),
+			Timeout: time.Duration(getEnvAsInt("STORAGE_SERVICE_TIMEOUT", 10)) * time.Second,
 		},
 		Logging: LoggingConfig{
 			Level:  getEnv("LOG_LEVEL", "debug"),

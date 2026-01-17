@@ -33,6 +33,9 @@ services:
       - JWT_ACCESS_TOKEN_EXPIRY=15m
       - JWT_REFRESH_TOKEN_EXPIRY=7d
       - ENCRYPTION_KEY=32-byte-encryption-key-here!!!!
+      # Storage service URL (external, configure if available)
+      - STORAGE_SERVICE_URL=http://storage-service:8086/storage
+      - STORAGE_SERVICE_TIMEOUT=10
       - LOG_LEVEL=debug
       - LOG_FORMAT=json
     depends_on:
@@ -58,6 +61,13 @@ services:
       - MONGODB_TIMEOUT=10
       - SECURITY_SERVICE_URL=http://security-service:8080
       - SECURITY_SERVICE_TIMEOUT=10
+      - IOT_SERVICE_URL=http://iot-control-service:8083
+      - IOT_SERVICE_TIMEOUT=10
+      # External APIs (configure if available)
+      - WEATHER_API_URL=http://external-weather:8085/external/weather
+      - TARIFF_API_URL=http://external-tariffs:8085/external/tariffs
+      - ML_MODEL_URL=http://ml-service:8085/ml/predict
+      - STORAGE_API_URL=http://storage-service:8086/storage
       - FORECAST_DEFAULT_HORIZON_HOURS=24
       - FORECAST_MAX_HORIZON_HOURS=168
       - PEAK_LOAD_THRESHOLD_PERCENTAGE=80
@@ -107,6 +117,9 @@ services:
       - FORECAST_SERVICE_TIMEOUT=10
       - ANALYTICS_SERVICE_URL=http://analytics-service:8084
       - ANALYTICS_SERVICE_TIMEOUT=10
+      # Storage service URL (external, configure if available)
+      - STORAGE_SERVICE_URL=http://storage-service:8086/storage
+      - STORAGE_SERVICE_TIMEOUT=10
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
       - MQTT_CLIENT_ID=iot-control-service
@@ -147,6 +160,9 @@ services:
       - IOT_SERVICE_TIMEOUT=10
       - FORECAST_SERVICE_URL=http://forecast-service:8082
       - FORECAST_SERVICE_TIMEOUT=10
+      # Storage service URL (external, configure if available)
+      - STORAGE_SERVICE_URL=http://storage-service:8086/storage
+      - STORAGE_SERVICE_TIMEOUT=10
       - ANALYTICS_ANOMALY_DETECTION_ENABLED=true
       - ANALYTICS_KPI_CALCULATION_INTERVAL=60
       - ANALYTICS_REPORT_RETENTION_DAYS=90

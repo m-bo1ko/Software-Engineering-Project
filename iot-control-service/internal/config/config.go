@@ -17,9 +17,16 @@ type Config struct {
 	Security  SecurityServiceConfig
 	Forecast  ForecastServiceConfig
 	Analytics AnalyticsServiceConfig
+	Storage   StorageServiceConfig
 	MQTT      MQTTConfig
 	IoT       IoTConfig
 	Logging   LoggingConfig
+}
+
+// StorageServiceConfig holds Storage service integration settings
+type StorageServiceConfig struct {
+	URL     string
+	Timeout time.Duration
 }
 
 // ServerConfig holds server-related configuration
@@ -66,8 +73,8 @@ type MQTTConfig struct {
 
 // IoTConfig holds IoT-specific settings
 type IoTConfig struct {
-	TelemetryBatchSize int
-	CommandTimeout     time.Duration
+	TelemetryBatchSize  int
+	CommandTimeout      time.Duration
 	StateUpdateInterval time.Duration
 }
 
@@ -106,6 +113,10 @@ func Load() *Config {
 		Analytics: AnalyticsServiceConfig{
 			URL:     getEnv("ANALYTICS_SERVICE_URL", "http://localhost:8084"),
 			Timeout: time.Duration(getEnvAsInt("ANALYTICS_SERVICE_TIMEOUT", 10)) * time.Second,
+		},
+		Storage: StorageServiceConfig{
+			URL:     getEnv("STORAGE_SERVICE_URL", "http://localhost:8086/storage"),
+			Timeout: time.Duration(getEnvAsInt("STORAGE_SERVICE_TIMEOUT", 10)) * time.Second,
 		},
 		MQTT: MQTTConfig{
 			Broker:   getEnv("MQTT_BROKER", "localhost"),

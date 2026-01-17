@@ -27,12 +27,13 @@ func NewOptimizationHandler(
 ) *OptimizationHandler {
 	return &OptimizationHandler{
 		optimizationService: optimizationService,
-		securityClient:       securityClient,
+		securityClient:      securityClient,
 	}
 }
 
 // ApplyOptimization handles optimization scenario application
-// POST /iot/optimization/apply
+// POST /iot/optimization/applySecurity (primary)
+// POST /iot/optimization/apply (legacy, for backward compatibility)
 func (h *OptimizationHandler) ApplyOptimization(c *gin.Context) {
 	var req models.ApplyOptimizationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -74,15 +74,16 @@ func (s *DashboardService) GetOverviewDashboard(ctx context.Context, authToken s
 	return &models.DashboardOverview{
 		TotalDevices:    len(devices),
 		OnlineDevices:   onlineCount,
-		TotalBuildings: 1, // Simplified
+		TotalBuildings:  1, // Simplified
 		ActiveAnomalies: int(activeAnomalies),
-		KPIs:           kpiMetrics,
+		KPIs:            kpiMetrics,
 		RecentAnomalies: anomalyResponses,
-		UpdatedAt:      time.Now(),
+		UpdatedAt:       time.Now(),
 	}, nil
 }
 
 // GetBuildingDashboard retrieves building-specific dashboard
+// Integration: Fetches forecast data from Forecast service to show predictions on dashboard
 func (s *DashboardService) GetBuildingDashboard(ctx context.Context, buildingID string, authToken string) (*models.BuildingDashboard, error) {
 	// Get devices for building
 	devices, err := s.iotClient.GetDevices(ctx, buildingID, authToken)
@@ -107,16 +108,35 @@ func (s *DashboardService) GetBuildingDashboard(ctx context.Context, buildingID 
 		kpiMetrics = kpi.Metrics
 	}
 
-	// Get forecast
-	forecast, _ := s.forecastClient.GetLatestForecast(ctx, buildingID, authToken)
+	// Integration: Fetch forecast data from Forecast service
+	// This provides prediction data to display on the building dashboard
+	var forecastSummary map[string]interface{}
+	if s.forecastClient != nil {
+		forecast, err := s.forecastClient.GetLatestForecast(ctx, buildingID, authToken)
+		if err == nil && forecast != nil {
+			forecastSummary = forecast
+			// Extract key forecast metrics to add to KPIs
+			if predictions, ok := forecast["predictions"].([]interface{}); ok && len(predictions) > 0 {
+				kpiMetrics["forecast_available"] = true
+				kpiMetrics["forecast_horizon_hours"] = len(predictions)
+				// Get predicted peak from forecast
+				if accuracy, ok := forecast["accuracy"].(map[string]interface{}); ok {
+					if score, ok := accuracy["score"].(float64); ok {
+						kpiMetrics["forecast_confidence"] = score
+					}
+				}
+			}
+		}
+	}
 
 	return &models.BuildingDashboard{
 		BuildingID:        buildingID,
 		DeviceCount:       len(devices),
 		OnlineDeviceCount: onlineCount,
 		ActiveAnomalies:   int(activeAnomalies),
-		KPIs:             kpiMetrics,
-		RecentTelemetry:  []models.TimeSeriesResponse{}, // Would be populated from time-series
-		UpdatedAt:        time.Now(),
+		KPIs:              kpiMetrics,
+		ForecastSummary:   forecastSummary,
+		RecentTelemetry:   []models.TimeSeriesResponse{}, // Would be populated from time-series
+		UpdatedAt:         time.Now(),
 	}, nil
 }

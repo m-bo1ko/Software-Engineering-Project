@@ -33,7 +33,7 @@ func NewControlService(
 		commandRepo: commandRepo,
 		deviceRepo:  deviceRepo,
 		mqttClient:  mqttClient,
-		config: &configWrapper{timeout: commandTimeout},
+		config:      &configWrapper{timeout: commandTimeout},
 	}
 }
 
@@ -48,7 +48,7 @@ func (c *configWrapper) GetCommandTimeout() time.Duration {
 // SendCommand sends a command to a device
 func (s *ControlService) SendCommand(ctx context.Context, deviceID string, req *models.SendCommandRequest, userID string) (*models.CommandResponse, error) {
 	// Validate device exists
-	device, err := s.deviceRepo.FindByDeviceID(ctx, deviceID)
+	_, err := s.deviceRepo.FindByDeviceID(ctx, deviceID)
 	if err != nil {
 		return nil, fmt.Errorf("device not found: %w", err)
 	}
@@ -121,7 +121,7 @@ func (s *ControlService) ListCommands(ctx context.Context, deviceID string, stat
 
 // ProcessCommandAck processes a command acknowledgment from a device
 func (s *ControlService) ProcessCommandAck(ctx context.Context, ack *models.CommandAck) error {
-	command, err := s.commandRepo.FindByCommandID(ctx, ack.CommandID)
+	_, err := s.commandRepo.FindByCommandID(ctx, ack.CommandID)
 	if err != nil {
 		return fmt.Errorf("command not found: %w", err)
 	}

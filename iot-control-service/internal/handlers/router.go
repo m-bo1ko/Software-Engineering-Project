@@ -103,6 +103,9 @@ func (r *Router) setupOptimizationRoutes(rg *gin.RouterGroup) {
 	optimization := rg.Group("/iot/optimization")
 	optimization.Use(r.AuthMiddleware.RequireAuth())
 	{
+		// Primary endpoint as per integration contract
+		optimization.POST("/applySecurity", r.OptimizationHandler.ApplyOptimization)
+		// Legacy endpoint for backward compatibility
 		optimization.POST("/apply", r.OptimizationHandler.ApplyOptimization)
 		optimization.GET("/status/:scenarioId", r.OptimizationHandler.GetOptimizationStatus)
 	}
@@ -150,6 +153,9 @@ func (r *Router) setupLegacyRoutes(engine *gin.Engine) {
 	optimization := engine.Group("/iot/optimization")
 	optimization.Use(r.AuthMiddleware.RequireAuth())
 	{
+		// Primary endpoint as per integration contract
+		optimization.POST("/applySecurity", r.OptimizationHandler.ApplyOptimization)
+		// Legacy endpoint for backward compatibility
 		optimization.POST("/apply", r.OptimizationHandler.ApplyOptimization)
 		optimization.GET("/status/:scenarioId", r.OptimizationHandler.GetOptimizationStatus)
 	}

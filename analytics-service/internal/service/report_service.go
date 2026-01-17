@@ -16,8 +16,8 @@ import (
 
 // ReportService handles report business logic
 type ReportService struct {
-	reportRepo   *repository.ReportRepository
-	iotClient    interface {
+	reportRepo *repository.ReportRepository
+	iotClient  interface {
 		GetTelemetryHistory(ctx context.Context, deviceID string, from, to time.Time, page, limit int, authToken string) ([]map[string]interface{}, error)
 		GetDevices(ctx context.Context, buildingID string, authToken string) ([]map[string]interface{}, error)
 	}
@@ -38,8 +38,8 @@ func NewReportService(
 	},
 ) *ReportService {
 	return &ReportService{
-		reportRepo:    reportRepo,
-		iotClient:     iotClient,
+		reportRepo:     reportRepo,
+		iotClient:      iotClient,
 		forecastClient: forecastClient,
 	}
 }
@@ -111,11 +111,11 @@ func (s *ReportService) generateReportContent(ctx context.Context, report *model
 	// Update report with content
 	updates := bson.M{
 		"content":      content,
-		"status":        models.ReportStatusCompleted,
-		"generated_at":  time.Now(),
+		"status":       models.ReportStatusCompleted,
+		"generated_at": time.Now(),
 	}
 
-	_, err := s.reportRepo.Update(ctx, report.ID.Hex(), updates)
+	_, err = s.reportRepo.Update(ctx, report.ID.Hex(), updates)
 	if err != nil {
 		log.Printf("Failed to update report: %v", err)
 	}
@@ -156,7 +156,7 @@ func (s *ReportService) generateEnergyConsumptionReport(ctx context.Context, req
 
 		totalConsumption += deviceTotal
 		deviceConsumptions = append(deviceConsumptions, map[string]interface{}{
-			"deviceId":   deviceID,
+			"deviceId":    deviceID,
 			"consumption": deviceTotal,
 		})
 	}
@@ -186,7 +186,7 @@ func (s *ReportService) generateDevicePerformanceReport(ctx context.Context, req
 
 		devicePerformances = append(devicePerformances, map[string]interface{}{
 			"deviceId": deviceID,
-			"status":    device["status"],
+			"status":   device["status"],
 			"lastSeen": device["lastSeen"],
 		})
 	}

@@ -51,7 +51,7 @@ func (c *IoTClient) GetDeviceState(ctx context.Context, deviceID string, authTok
 	}
 
 	var apiResp struct {
-		Success bool              `json:"success"`
+		Success bool               `json:"success"`
 		Data    models.DeviceState `json:"data"`
 	}
 
@@ -95,24 +95,25 @@ func (c *IoTClient) GetDevicesByBuilding(ctx context.Context, buildingID string,
 
 // ApplyOptimizationRequest represents the request to apply optimization
 type ApplyOptimizationRequest struct {
-	ScenarioID string                     `json:"scenarioId"`
-	BuildingID string                     `json:"buildingId"`
+	ScenarioID string                      `json:"scenarioId"`
+	BuildingID string                      `json:"buildingId"`
 	Actions    []models.OptimizationAction `json:"actions"`
-	ExecuteNow bool                       `json:"executeNow"`
-	DryRun     bool                       `json:"dryRun"`
+	ExecuteNow bool                        `json:"executeNow"`
+	DryRun     bool                        `json:"dryRun"`
 }
 
 // ApplyOptimizationResponse represents the response from applying optimization
 type ApplyOptimizationResponse struct {
-	Success       bool     `json:"success"`
-	ExecutionID   string   `json:"executionId"`
-	ActionsQueued int      `json:"actionsQueued"`
-	ActionsSkipped int     `json:"actionsSkipped"`
-	Errors        []string `json:"errors,omitempty"`
-	Message       string   `json:"message,omitempty"`
+	Success        bool     `json:"success"`
+	ExecutionID    string   `json:"executionId"`
+	ActionsQueued  int      `json:"actionsQueued"`
+	ActionsSkipped int      `json:"actionsSkipped"`
+	Errors         []string `json:"errors,omitempty"`
+	Message        string   `json:"message,omitempty"`
 }
 
 // ApplyOptimization sends optimization actions to the IoT service
+// Uses /iot/optimization/applySecurity endpoint as per integration contract
 func (c *IoTClient) ApplyOptimization(ctx context.Context, scenario *models.OptimizationScenario, executeNow, dryRun bool, authToken string) (*ApplyOptimizationResponse, error) {
 	payload := ApplyOptimizationRequest{
 		ScenarioID: scenario.ID.Hex(),
@@ -127,7 +128,7 @@ func (c *IoTClient) ApplyOptimization(ctx context.Context, scenario *models.Opti
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/iot/optimization/apply", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/iot/optimization/applySecurity", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

@@ -62,7 +62,9 @@ func main() {
 
 	// Initialize external integrations
 	securityClient := integrations.NewSecurityClient(cfg)
+	// Integration: ForecastClient enables fetching device predictions for optimization timing
 	forecastClient := integrations.NewForecastClient(cfg)
+	// Integration: AnalyticsClient enables checking anomalies before applying optimizations
 	analyticsClient := integrations.NewAnalyticsClient(cfg)
 
 	// Initialize MQTT client
@@ -79,7 +81,9 @@ func main() {
 	deviceService := service.NewDeviceService(deviceRepo)
 	telemetryService := service.NewTelemetryService(telemetryRepo, deviceRepo)
 	controlService := service.NewControlService(commandRepo, deviceRepo, mqttClient, cfg.IoT.CommandTimeout)
-	optimizationService := service.NewOptimizationService(optimizationRepo, commandRepo, deviceRepo)
+	// Integration: OptimizationService now uses ForecastClient and AnalyticsClient
+	// to fetch predictions and check anomalies before executing optimization scenarios
+	optimizationService := service.NewOptimizationService(optimizationRepo, commandRepo, deviceRepo, forecastClient, analyticsClient)
 	stateService := service.NewStateService(deviceRepo, telemetryRepo)
 
 	// Initialize middleware
@@ -168,7 +172,7 @@ func setupMQTTSubscriptions(
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		command, err := commandRepo.FindByCommandID(ctx, ack.CommandID)
+		_, err := commandRepo.FindByCommandID(ctx, ack.CommandID)
 		if err != nil {
 			log.Printf("Command not found for ack: %s", ack.CommandID)
 			return
