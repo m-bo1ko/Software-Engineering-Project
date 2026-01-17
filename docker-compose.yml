@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     container_name: security-service
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       - SERVER_PORT=8080
       - SERVER_HOST=0.0.0.0
@@ -67,6 +67,98 @@ services:
       mongodb:
         condition: service_healthy
       security-service:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mqtt/config:/mosquitto/config
+      - ./mqtt/data:/mosquitto/data
+      - ./mqtt/log:/mosquitto/log
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: mosquitto -c /mosquitto/config/mosquitto.conf
+
+  iot-control-service:
+    build:
+      context: ./iot-control-service
+      dockerfile: Dockerfile
+    container_name: iot-control-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - SERVER_HOST=0.0.0.0
+      - GIN_MODE=debug
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DATABASE=iot_control_service
+      - MONGODB_TIMEOUT=10
+      - SECURITY_SERVICE_URL=http://security-service:8080
+      - SECURITY_SERVICE_TIMEOUT=10
+      - FORECAST_SERVICE_URL=http://forecast-service:8082
+      - FORECAST_SERVICE_TIMEOUT=10
+      - ANALYTICS_SERVICE_URL=http://analytics-service:8084
+      - ANALYTICS_SERVICE_TIMEOUT=10
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - MQTT_CLIENT_ID=iot-control-service
+      - MQTT_QOS=1
+      - IOT_TELEMETRY_BATCH_SIZE=100
+      - IOT_COMMAND_TIMEOUT=30
+      - IOT_STATE_UPDATE_INTERVAL=5
+      - LOG_LEVEL=debug
+      - LOG_FORMAT=json
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      security-service:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: analytics-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVER_PORT=8084
+      - SERVER_HOST=0.0.0.0
+      - GIN_MODE=debug
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DATABASE=analytics_service
+      - MONGODB_TIMEOUT=10
+      - SECURITY_SERVICE_URL=http://security-service:8080
+      - SECURITY_SERVICE_TIMEOUT=10
+      - IOT_SERVICE_URL=http://iot-control-service:8083
+      - IOT_SERVICE_TIMEOUT=10
+      - FORECAST_SERVICE_URL=http://forecast-service:8082
+      - FORECAST_SERVICE_TIMEOUT=10
+      - ANALYTICS_ANOMALY_DETECTION_ENABLED=true
+      - ANALYTICS_KPI_CALCULATION_INTERVAL=60
+      - ANALYTICS_REPORT_RETENTION_DAYS=90
+      - ANALYTICS_TIME_SERIES_AGGREGATION_INTERVAL=60
+      - LOG_LEVEL=debug
+      - LOG_FORMAT=json
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      security-service:
+        condition: service_started
+      iot-control-service:
         condition: service_started
     networks:
       - app-network

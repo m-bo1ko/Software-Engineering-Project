@@ -1,0 +1,4 @@
+# MQTT broker data and logs
+data/
+log/
+*.log
