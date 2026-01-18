@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"iot-control-service/internal/models"
 	"iot-control-service/internal/repository"
@@ -62,10 +63,18 @@ func (s *StateService) GetLiveState(ctx context.Context) (*models.LiveStateRespo
 		states = append(states, state)
 	}
 
+	// Determine last update time
+	var lastUpdate time.Time
+	if len(states) > 0 {
+		lastUpdate = states[0].LastUpdate
+	} else {
+		lastUpdate = time.Now()
+	}
+
 	return &models.LiveStateResponse{
 		Devices: states,
 		Count:   len(states),
-		Updated: states[0].LastUpdate, // Simplified
+		Updated: lastUpdate,
 	}, nil
 }
 

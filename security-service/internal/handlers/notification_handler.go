@@ -88,6 +88,71 @@ func (h *NotificationHandler) UpdatePreferences(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(prefs, "Notification preferences updated successfully"))
 }
 
+// GetPreferences retrieves user notification preferences
+// GET /notifications/preferences/:userId
+func (h *NotificationHandler) GetPreferences(c *gin.Context) {
+	userID := c.Param("userId")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(
+			models.ErrCodeValidationFailed,
+			"User ID is required",
+			"",
+		))
+		return
+	}
+
+	prefs, err := h.notificationService.GetPreferences(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(
+			models.ErrCodeInternalError,
+			"Failed to retrieve notification preferences",
+			err.Error(),
+		))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(prefs, ""))
+}
+
+// UpdatePreferencesByUserID updates user notification preferences by user ID
+// PUT /notifications/preferences/:userId
+func (h *NotificationHandler) UpdatePreferencesByUserID(c *gin.Context) {
+	userID := c.Param("userId")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(
+			models.ErrCodeValidationFailed,
+			"User ID is required",
+			"",
+		))
+		return
+	}
+
+	var req models.NotificationPreferencesUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(
+			models.ErrCodeValidationFailed,
+			"Invalid request body",
+			err.Error(),
+		))
+		return
+	}
+
+	// Set the user ID from the path parameter
+	req.UserID = userID
+
+	prefs, err := h.notificationService.UpdatePreferences(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(
+			models.ErrCodeInternalError,
+			"Failed to update notification preferences",
+			err.Error(),
+		))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(prefs, "Notification preferences updated successfully"))
+}
+
 // GetLogs retrieves notification history for a user
 // GET /notifications/logs
 func (h *NotificationHandler) GetLogs(c *gin.Context) {

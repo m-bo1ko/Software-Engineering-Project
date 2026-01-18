@@ -113,7 +113,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 func (h *AuthHandler) ValidateToken(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
-		c.JSON(http.StatusOK, &models.TokenValidationResponse{
+		c.JSON(http.StatusUnauthorized, &models.TokenValidationResponse{
 			Valid:   false,
 			Message: "Authorization header is required",
 		})
@@ -122,7 +122,7 @@ func (h *AuthHandler) ValidateToken(c *gin.Context) {
 
 	token, err := utils.ExtractTokenFromHeader(authHeader)
 	if err != nil {
-		c.JSON(http.StatusOK, &models.TokenValidationResponse{
+		c.JSON(http.StatusUnauthorized, &models.TokenValidationResponse{
 			Valid:   false,
 			Message: "Invalid authorization header format",
 		})
@@ -136,6 +136,12 @@ func (h *AuthHandler) ValidateToken(c *gin.Context) {
 			"Failed to validate token",
 			err.Error(),
 		))
+		return
+	}
+
+	// If token is not valid, return 401
+	if !response.Valid {
+		c.JSON(http.StatusUnauthorized, response)
 		return
 	}
 

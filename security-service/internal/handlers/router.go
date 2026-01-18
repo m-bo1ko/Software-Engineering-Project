@@ -148,6 +148,8 @@ func (r *Router) setupNotificationRoutes(rg *gin.RouterGroup) {
 	{
 		notifications.POST("/send", r.NotificationHandler.SendNotification)
 		notifications.POST("/preferences", r.NotificationHandler.UpdatePreferences)
+		notifications.GET("/preferences/:userId", r.NotificationHandler.GetPreferences)
+		notifications.PUT("/preferences/:userId", r.NotificationHandler.UpdatePreferencesByUserID)
 		notifications.GET("/logs", r.NotificationHandler.GetLogs)
 	}
 }
@@ -208,6 +210,8 @@ func (r *Router) setupLegacyRoutes(engine *gin.Engine) {
 	{
 		notifications.POST("/send", r.NotificationHandler.SendNotification)
 		notifications.POST("/preferences", r.NotificationHandler.UpdatePreferences)
+		notifications.GET("/preferences/:userId", r.NotificationHandler.GetPreferences)
+		notifications.PUT("/preferences/:userId", r.NotificationHandler.UpdatePreferencesByUserID)
 		notifications.GET("/logs", r.NotificationHandler.GetLogs)
 	}
 

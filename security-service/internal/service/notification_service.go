@@ -133,6 +133,11 @@ func (s *NotificationService) UpdatePreferences(ctx context.Context, req *models
 	return prefs, nil
 }
 
+// GetPreferences retrieves user notification preferences
+func (s *NotificationService) GetPreferences(ctx context.Context, userID string) (*models.NotificationPreferences, error) {
+	return s.notificationRepo.GetPreferences(ctx, userID)
+}
+
 // GetLogs retrieves notification history for a user
 func (s *NotificationService) GetLogs(ctx context.Context, params models.NotificationLogQueryParams) (*models.PaginatedNotificationsResponse, error) {
 	return s.notificationRepo.GetPaginatedResponse(ctx, params)

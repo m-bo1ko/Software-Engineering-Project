@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,9 @@ import (
 	"security-service/internal/models"
 	"security-service/internal/service"
 )
+
+// objectIDRegex validates MongoDB ObjectID format (24 hex characters)
+var objectIDRegex = regexp.MustCompile(`^[a-fA-F0-9]{24}$`)
 
 // UserHandler handles user management requests
 type UserHandler struct {
@@ -50,6 +54,16 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 // GET /users/:id
 func (h *UserHandler) GetUser(c *gin.Context) {
 	id := c.Param("id")
+
+	// Validate ID format
+	if !objectIDRegex.MatchString(id) {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(
+			models.ErrCodeValidationFailed,
+			"Invalid user ID format",
+			"ID must be a valid 24-character hex string",
+		))
+		return
+	}
 
 	user, err := h.userService.GetUser(c.Request.Context(), id)
 	if err != nil {

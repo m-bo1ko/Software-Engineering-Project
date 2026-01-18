@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -13,7 +14,7 @@ import (
 
 // DeviceHandler handles device-related requests
 type DeviceHandler struct {
-	deviceService *service.DeviceService
+	deviceService  *service.DeviceService
 	securityClient interface {
 		AuditLog(ctx interface{}, userID, username, action, resource, resourceID, status, errorMsg, ipAddress, userAgent, requestPath, method string, details map[string]interface{})
 	}
@@ -56,6 +57,15 @@ func (h *DeviceHandler) RegisterDevice(c *gin.Context) {
 			"FAILURE", err.Error(), ipAddress, userAgent, c.Request.URL.Path, c.Request.Method,
 			map[string]interface{}{"deviceId": req.DeviceID},
 		)
+		// Check for duplicate device error
+		if strings.Contains(err.Error(), "already exists") {
+			c.JSON(http.StatusConflict, models.NewErrorResponse(
+				models.ErrCodeDeviceExists,
+				err.Error(),
+				"",
+			))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(
 			models.ErrCodeInternalError,
 			err.Error(),

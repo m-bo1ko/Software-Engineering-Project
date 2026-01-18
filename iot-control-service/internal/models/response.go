@@ -49,6 +49,7 @@ const (
 	ErrCodeTokenInvalid       = "TOKEN_INVALID"
 	ErrCodeExternalAPIError   = "EXTERNAL_API_ERROR"
 	ErrCodeDeviceNotFound     = "DEVICE_NOT_FOUND"
+	ErrCodeDeviceExists       = "DEVICE_EXISTS"
 	ErrCodeCommandFailed      = "COMMAND_FAILED"
 	ErrCodeMQTTError          = "MQTT_ERROR"
 	ErrCodeOptimizationFailed = "OPTIMIZATION_FAILED"

@@ -35,12 +35,18 @@ func (s *DeviceService) RegisterDevice(ctx context.Context, req *models.Register
 		return nil, fmt.Errorf("device with ID %s already exists", req.DeviceID)
 	}
 
+	// Prepare location - merge top-level buildingId into location if needed
+	location := req.Location
+	if location.BuildingID == "" && req.BuildingID != "" {
+		location.BuildingID = req.BuildingID
+	}
+
 	// Create device
 	device := &models.Device{
 		DeviceID:     req.DeviceID,
 		Type:         req.Type,
 		Model:        req.Model,
-		Location:     req.Location,
+		Location:     location,
 		Capabilities: req.Capabilities,
 		Status:       models.DeviceStatusOffline,
 		LastSeen:     time.Time{},
@@ -119,7 +125,8 @@ func (s *DeviceService) validateRegisterDevice(req *models.RegisterDeviceRequest
 	if req.Type == "" {
 		return fmt.Errorf("device type is required")
 	}
-	if req.Location.BuildingID == "" {
+	// Accept buildingId from either top-level or location
+	if req.GetBuildingID() == "" {
 		return fmt.Errorf("building ID is required")
 	}
 	return nil

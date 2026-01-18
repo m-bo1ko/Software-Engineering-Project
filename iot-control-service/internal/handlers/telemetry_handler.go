@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,7 @@ func NewTelemetryHandler(
 ) *TelemetryHandler {
 	return &TelemetryHandler{
 		telemetryService: telemetryService,
-		securityClient:    securityClient,
+		securityClient:   securityClient,
 	}
 }
 
@@ -56,6 +57,15 @@ func (h *TelemetryHandler) IngestTelemetry(c *gin.Context) {
 			"FAILURE", err.Error(), ipAddress, userAgent, c.Request.URL.Path, c.Request.Method,
 			map[string]interface{}{"deviceId": req.DeviceID},
 		)
+		// Check if device not found error
+		if strings.Contains(err.Error(), "device not found") {
+			c.JSON(http.StatusNotFound, models.NewErrorResponse(
+				models.ErrCodeDeviceNotFound,
+				err.Error(),
+				"",
+			))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(
 			models.ErrCodeInternalError,
 			err.Error(),
